@@ -1,5 +1,6 @@
 FROM registry.access.redhat.com/rhel7/rhel-atomic:latest
 
+# the add command copies the tar.gz from the dist folder and gunzips and untars it into the container's /opt/java folder
 ADD dist/jdk-8u121-linux-x64.tar.gz /opt/java/
 
 RUN ls -al /opt/java
