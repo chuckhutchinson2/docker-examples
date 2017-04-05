@@ -1,0 +1,14 @@
+mkdir dist
+
+# copy the spring boot project to the distribution folder
+cp ~/code/gs-spring-boot/initial/build/libs/gs-spring-boot-0.1.0.jar dist/
+
+# dynamically create a script file in the distribution folder.
+# this will be the command used in the docker file
+cat << EOF > dist/springboot.sh
+java -jar gs-spring-boot-0.1.0.jar
+EOF
+
+# build the docker image
+docker build -t docker/docker-examples .
+rm -fr dist

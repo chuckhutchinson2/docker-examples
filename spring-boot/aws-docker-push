@@ -1,0 +1,1 @@
+docker push 395319207868.dkr.ecr.us-east-1.amazonaws.com/docker/docker-examples:latest
