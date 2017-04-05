@@ -1,0 +1,8 @@
+
+REPOSITORY                                                            TAG                 IMAGE ID            CREATED             SIZE
+395319207868.dkr.ecr.us-east-1.amazonaws.com/docker/docker-examples   latest              d2f17eb0c7d0        2 hours ago         460 MB
+docker/docker-examples                                                latest              d2f17eb0c7d0        2 hours ago         460 MB
+gs-spring-boot                                                        latest              d2f17eb0c7d0        2 hours ago         460 MB
+rhel7-jdk                                                             latest              654bf1b4717d        2 hours ago         445 MB
+registry.access.redhat.com/rhel7/rhel-atomic                          latest              c8833d5bce74        3 weeks ago         75.3 MB
+
