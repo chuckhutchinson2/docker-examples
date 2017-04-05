@@ -1,4 +1,9 @@
 mkdir dist
 cp ~/code/gs-spring-boot/initial/build/libs/gs-spring-boot-0.1.0.jar dist/
+
+cat << EOF > dist/springboot.sh
+java -jar gs-spring-boot-0.1.0.jar
+EOF
+
 docker build -t gs-spring-boot .
 rm -fr dist

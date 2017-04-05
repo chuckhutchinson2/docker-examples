@@ -1,10 +1,12 @@
 FROM rhel7-jdk:latest
 
-WORKDIR /prod/msp/
+WORKDIR /opt/springboot/
 
-ADD dist/ /prod/msp/
+ADD dist/ /opt/springboot/
 
-CMD ["java", "-jar", "gs-spring-boot-0.1.0.jar"]
+RUN chmod ugo+x springboot.sh
+
+CMD /opt/springboot/springboot.sh
 
 
 
