@@ -1,0 +1,9 @@
+
+cd rhel7-java
+./build
+cd ..
+
+cd spring-boot
+./build
+cd ..
+
