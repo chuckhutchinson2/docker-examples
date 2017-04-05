@@ -1,0 +1,2 @@
+
+docker run -it rhel7-jdk bash
