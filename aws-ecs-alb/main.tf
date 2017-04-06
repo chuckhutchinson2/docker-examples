@@ -42,7 +42,7 @@ resource "aws_route_table_association" "a" {
 ### Compute
 
 resource "aws_autoscaling_group" "app" {
-  name                 = "tf-test-asg"
+  name                 = "${var.tag}-asg"
   vpc_zone_identifier  = ["${aws_subnet.main.*.id}"]
   min_size             = "${var.asg_min}"
   max_size             = "${var.asg_max}"
@@ -106,7 +106,7 @@ resource "aws_security_group" "lb_sg" {
   description = "controls access to the application ELB"
 
   vpc_id = "${aws_vpc.main.id}"
-  name   = "tf-ecs-lbsg"
+  name   = "${var.tag}-ecs-lbsg"
 
   ingress {
     protocol    = "tcp"
@@ -129,7 +129,7 @@ resource "aws_security_group" "lb_sg" {
 resource "aws_security_group" "instance_sg" {
   description = "controls direct access to application instances"
   vpc_id      = "${aws_vpc.main.id}"
-  name        = "tf-ecs-instsg"
+  name        = "${var.tag}-ecs-instsg"
 
   ingress {
     protocol  = "tcp"
@@ -162,7 +162,7 @@ resource "aws_security_group" "instance_sg" {
 ## ECS
 
 resource "aws_ecs_cluster" "main" {
-  name = "terraform_example_ecs_cluster"
+  name = "${var.tag}_ecs_cluster"
 }
 
 data "template_file" "task_definition" {
@@ -170,19 +170,19 @@ data "template_file" "task_definition" {
 
   vars {
     image_url        = "395319207868.dkr.ecr.us-east-1.amazonaws.com/docker/docker-examples:latest"
-    container_name   = "ghost"
+    container_name   = "${var.tag}"
     log_group_region = "${var.aws_region}"
     log_group_name   = "${aws_cloudwatch_log_group.app.name}"
   }
 }
 
 resource "aws_ecs_task_definition" "ghost" {
-  family                = "tf_example_ghost_td"
+  family                = "${var.tag}_td"
   container_definitions = "${data.template_file.task_definition.rendered}"
 }
 
 resource "aws_ecs_service" "test" {
-  name            = "tf-example-ecs-ghost"
+  name            = "${var.tag}-ecs"
   cluster         = "${aws_ecs_cluster.main.id}"
   task_definition = "${aws_ecs_task_definition.ghost.arn}"
   desired_count   = 1
@@ -190,7 +190,7 @@ resource "aws_ecs_service" "test" {
 
   load_balancer {
     target_group_arn = "${aws_alb_target_group.test.id}"
-    container_name   = "ghost"
+    container_name   = "${var.tag}"
     container_port   = "8080"
   }
 
@@ -291,14 +291,14 @@ resource "aws_iam_role_policy" "instance" {
 ## ALB
 
 resource "aws_alb_target_group" "test" {
-  name     = "tf-example-ecs-ghost"
+  name     = "ecs-${var.tag}"
   port     = 80
   protocol = "HTTP"
   vpc_id   = "${aws_vpc.main.id}"
 }
 
 resource "aws_alb" "main" {
-  name            = "tf-example-alb-ecs"
+  name            = "alb-ecs-${var.tag}"
   subnets         = ["${aws_subnet.main.*.id}"]
   security_groups = ["${aws_security_group.lb_sg.id}"]
 }

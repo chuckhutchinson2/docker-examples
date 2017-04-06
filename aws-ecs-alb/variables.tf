@@ -1,3 +1,8 @@
+variable "tag" {
+  description = "The base tag used to tag AWS resources"
+  default = "springboot"
+}
+
 variable "aws_region" {
   description = "The AWS region to create things in."
   default     = "us-east-1"
@@ -14,8 +19,8 @@ variable "key_name" {
 }
 
 variable "instance_type" {
-  default     = "t2.micro"
   description = "AWS instance type"
+  default     = "t2.micro"
 }
 
 variable "asg_min" {
