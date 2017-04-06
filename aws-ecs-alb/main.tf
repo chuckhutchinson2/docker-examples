@@ -48,6 +48,12 @@ resource "aws_autoscaling_group" "app" {
   max_size             = "${var.asg_max}"
   desired_capacity     = "${var.asg_desired}"
   launch_configuration = "${aws_launch_configuration.app.name}"
+
+  initial_lifecycle_hook {
+    name                 = "${var.tag}"
+    # autoscaling_group_name = "${var.tag}-asg"
+    lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
+  }
 }
 
 data "template_file" "cloud_config" {
@@ -88,6 +94,7 @@ resource "aws_launch_configuration" "app" {
     "${aws_security_group.instance_sg.id}",
   ]
 
+  name_prefix                 = "${var.tag}"
   key_name                    = "${var.key_name}"
   image_id                    = "${data.aws_ami.stable_coreos.id}"
   instance_type               = "${var.instance_type}"
@@ -291,14 +298,14 @@ resource "aws_iam_role_policy" "instance" {
 ## ALB
 
 resource "aws_alb_target_group" "test" {
-  name     = "ecs-${var.tag}"
+  name     = "${var.tag}-ecs"
   port     = 80
   protocol = "HTTP"
   vpc_id   = "${aws_vpc.main.id}"
 }
 
 resource "aws_alb" "main" {
-  name            = "alb-ecs-${var.tag}"
+  name            = "${var.tag}-alb-ecs"
   subnets         = ["${aws_subnet.main.*.id}"]
   security_groups = ["${aws_security_group.lb_sg.id}"]
 }
@@ -321,5 +328,5 @@ resource "aws_cloudwatch_log_group" "ecs" {
 }
 
 resource "aws_cloudwatch_log_group" "app" {
-  name = "tf-ecs-group/app-ghost"
+  name = "tf-ecs-group/app-${var.tag}"
 }
