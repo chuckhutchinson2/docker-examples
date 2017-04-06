@@ -48,12 +48,6 @@ resource "aws_autoscaling_group" "app" {
   max_size             = "${var.asg_max}"
   desired_capacity     = "${var.asg_desired}"
   launch_configuration = "${aws_launch_configuration.app.name}"
-
-  initial_lifecycle_hook {
-    name                 = "${var.tag}"
-    # autoscaling_group_name = "${var.tag}-asg"
-    lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
-  }
 }
 
 data "template_file" "cloud_config" {
@@ -169,7 +163,7 @@ resource "aws_security_group" "instance_sg" {
 ## ECS
 
 resource "aws_ecs_cluster" "main" {
-  name = "${var.tag}_ecs_cluster"
+  name = "${var.tag}"
 }
 
 data "template_file" "task_definition" {
