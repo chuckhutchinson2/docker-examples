@@ -48,6 +48,12 @@ resource "aws_autoscaling_group" "app" {
   max_size             = "${var.asg_max}"
   desired_capacity     = "${var.asg_desired}"
   launch_configuration = "${aws_launch_configuration.app.name}"
+
+  tag {
+	key   = "Name"
+	value = "${var.tag}"
+	propagate_at_launch = true
+  }
 }
 
 data "template_file" "cloud_config" {
@@ -88,7 +94,7 @@ resource "aws_launch_configuration" "app" {
     "${aws_security_group.instance_sg.id}",
   ]
 
-  name_prefix                 = "${var.tag}"
+  name_prefix                 = "${var.tag}-"
   key_name                    = "${var.key_name}"
   image_id                    = "${data.aws_ami.stable_coreos.id}"
   instance_type               = "${var.instance_type}"
@@ -178,7 +184,7 @@ data "template_file" "task_definition" {
 }
 
 resource "aws_ecs_task_definition" "ghost" {
-  family                = "${var.tag}_td"
+  family                = "${var.tag}-td"
   container_definitions = "${data.template_file.task_definition.rendered}"
 }
 
