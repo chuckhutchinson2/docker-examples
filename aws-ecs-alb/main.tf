@@ -42,7 +42,7 @@ resource "aws_route_table_association" "a" {
 ### Compute
 
 resource "aws_autoscaling_group" "app" {
-  name                 = "${var.tag}-asg"
+  name                 = "${var.tag}-${var.environment}-asg"
   vpc_zone_identifier  = ["${aws_subnet.main.*.id}"]
   min_size             = "${var.asg_min}"
   max_size             = "${var.asg_max}"
@@ -51,7 +51,7 @@ resource "aws_autoscaling_group" "app" {
 
   tag {
 	key   = "Name"
-	value = "${var.tag}"
+	value = "${var.tag}-${var.environment}"
 	propagate_at_launch = true
   }
 }
@@ -94,7 +94,7 @@ resource "aws_launch_configuration" "app" {
     "${aws_security_group.instance_sg.id}",
   ]
 
-  name_prefix                 = "${var.tag}-"
+  name_prefix                 = "${var.tag}-${var.environment}-"
   key_name                    = "${var.key_name}"
   image_id                    = "${data.aws_ami.stable_coreos.id}"
   instance_type               = "${var.instance_type}"
@@ -113,7 +113,7 @@ resource "aws_security_group" "lb_sg" {
   description = "controls access to the application ELB"
 
   vpc_id = "${aws_vpc.main.id}"
-  name   = "${var.tag}-ecs-lbsg"
+  name   = "${var.tag}-${var.environment}-ecs-lbsg"
 
   ingress {
     protocol    = "tcp"
@@ -136,7 +136,7 @@ resource "aws_security_group" "lb_sg" {
 resource "aws_security_group" "instance_sg" {
   description = "controls direct access to application instances"
   vpc_id      = "${aws_vpc.main.id}"
-  name        = "${var.tag}-ecs-instsg"
+  name        = "${var.tag}-${var.environment}-ecs-instsg"
 
   ingress {
     protocol  = "tcp"
@@ -169,7 +169,7 @@ resource "aws_security_group" "instance_sg" {
 ## ECS
 
 resource "aws_ecs_cluster" "main" {
-  name = "${var.tag}"
+  name = "${var.tag}-${var.environment}"
 }
 
 data "template_file" "task_definition" {
@@ -177,27 +177,27 @@ data "template_file" "task_definition" {
 
   vars {
     image_url        = "395319207868.dkr.ecr.us-east-1.amazonaws.com/docker/docker-examples:latest"
-    container_name   = "${var.tag}"
+    container_name   = "${var.tag}-${var.environment}"
     log_group_region = "${var.aws_region}"
     log_group_name   = "${aws_cloudwatch_log_group.app.name}"
   }
 }
 
-resource "aws_ecs_task_definition" "ghost" {
-  family                = "${var.tag}-td"
+resource "aws_ecs_task_definition" "td" {
+  family                = "${var.tag}-${var.environment}-td"
   container_definitions = "${data.template_file.task_definition.rendered}"
 }
 
 resource "aws_ecs_service" "test" {
-  name            = "${var.tag}-ecs"
+  name            = "${var.tag}-${var.environment}-ecs"
   cluster         = "${aws_ecs_cluster.main.id}"
-  task_definition = "${aws_ecs_task_definition.ghost.arn}"
+  task_definition = "${aws_ecs_task_definition.td.arn}"
   desired_count   = 1
   iam_role        = "${aws_iam_role.ecs_service.name}"
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.test.id}"
-    container_name   = "${var.tag}"
+    target_group_arn = "${aws_alb_target_group.alb_tg.id}"
+    container_name   = "${var.tag}-${var.environment}"
     container_port   = "8080"
   }
 
@@ -210,7 +210,7 @@ resource "aws_ecs_service" "test" {
 ## IAM
 
 resource "aws_iam_role" "ecs_service" {
-  name = "tf_example_ecs_role"
+  name = "${var.tag}_${var.environment}_ecs_role"
 
   assume_role_policy = <<EOF
 {
@@ -230,7 +230,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "ecs_service" {
-  name = "tf_example_ecs_policy"
+  name = "${var.tag}_${var.environment}_ecs_policy"
   role = "${aws_iam_role.ecs_service.name}"
 
   policy = <<EOF
@@ -297,15 +297,15 @@ resource "aws_iam_role_policy" "instance" {
 
 ## ALB
 
-resource "aws_alb_target_group" "test" {
-  name     = "${var.tag}-ecs"
+resource "aws_alb_target_group" "alb_tg" {
+  name     = "${var.tag}-${var.environment}-ecs"
   port     = 80
   protocol = "HTTP"
   vpc_id   = "${aws_vpc.main.id}"
 }
 
 resource "aws_alb" "main" {
-  name            = "${var.tag}-alb-ecs"
+  name            = "${var.tag}-${var.environment}-alb-ecs"
   subnets         = ["${aws_subnet.main.*.id}"]
   security_groups = ["${aws_security_group.lb_sg.id}"]
 }
@@ -316,7 +316,7 @@ resource "aws_alb_listener" "front_end" {
   protocol          = "HTTP"
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.test.id}"
+    target_group_arn = "${aws_alb_target_group.alb_tg.id}"
     type             = "forward"
   }
 }
@@ -328,5 +328,5 @@ resource "aws_cloudwatch_log_group" "ecs" {
 }
 
 resource "aws_cloudwatch_log_group" "app" {
-  name = "tf-ecs-group/app-${var.tag}"
+  name = "tf-ecs-group/app-${var.tag}-${var.environment}"
 }

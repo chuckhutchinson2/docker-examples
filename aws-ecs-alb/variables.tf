@@ -1,3 +1,8 @@
+variable "environment" {
+  description = "This is the tag used to desribe the environment"
+  default = "dev"
+}
+
 variable "tag" {
   description = "The base tag used to tag AWS resources"
   default = "springboot"
