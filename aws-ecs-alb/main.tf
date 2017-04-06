@@ -261,17 +261,17 @@ resource "aws_iam_instance_profile" "app" {
 }
 
 resource "aws_iam_role" "app_instance" {
-  name = "tf-ecs-example-instance-role"
+  name = "ecs-${var.tag}-${var.environment}-instance-role"
 
   assume_role_policy = <<EOF
 {
-  "Version": "2012-10-17",
+  "Version": "2008-10-17",
   "Statement": [
     {
       "Sid": "",
       "Effect": "Allow",
       "Principal": {
-        "Service": "ec2.amazonaws.com"
+        "Service": "ecs.amazonaws.com"
       },
       "Action": "sts:AssumeRole"
     }
@@ -290,7 +290,7 @@ data "template_file" "instance_profile" {
 }
 
 resource "aws_iam_role_policy" "instance" {
-  name   = "TfEcsExampleInstanceRole"
+  name   = "Ecs_${var.tag}_${var.environment}_InstanceRole"
   role   = "${aws_iam_role.app_instance.name}"
   policy = "${data.template_file.instance_profile.rendered}"
 }
@@ -324,9 +324,9 @@ resource "aws_alb_listener" "front_end" {
 ## CloudWatch Logs
 
 resource "aws_cloudwatch_log_group" "ecs" {
-  name = "tf-ecs-group/ecs-agent"
+  name = "tf-ecs-${var.tag}-${var.environment}-group/ecs-agent"
 }
 
 resource "aws_cloudwatch_log_group" "app" {
-  name = "tf-ecs-group/app-${var.tag}-${var.environment}"
+  name = "tf-ecs-${var.tag}-${var.environment}-group/app-${var.tag}-${var.environment}"
 }
