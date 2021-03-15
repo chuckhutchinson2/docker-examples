@@ -1,1 +1,2 @@
-docker login https://hub.docker.com/
+#docker login https://hub.docker.com/
+docker login 

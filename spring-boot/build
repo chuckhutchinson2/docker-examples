@@ -1,3 +1,24 @@
+
+# When I create docker files, I like to stage everything in a dist directory and then
+# Add the dist directory into image using the ADD dockerfile directive.  I find this
+# easier to do since you need to escape the RUN directive within the Dockerfile and
+# the logic looks rather frankly fugly. 
+# 
+# Here is what the complete dockerfile looks like:
+# 
+#	 FROM rhel7-jdk:latest
+# 
+#	 WORKDIR /opt/springboot/
+# 
+#	 ADD dist/ /opt/springboot/
+# 
+#	 RUN chmod ugo+x springboot.sh
+# 
+#	 CMD /opt/springboot/springboot.sh
+# 
+# also note that when I run my docker files I mount a volume that the script file
+# below sources - /opt/environment.  This way we can pass environment variables
+# into the running docker image instead of passing them via the command line
 mkdir dist
 
 # copy the spring boot project to the distribution folder
@@ -16,6 +37,7 @@ fi
 java -jar spring-boot-docker-0.1.0.jar
 EOF
 
-# build the docker image
+# now that we have staged everything, build the docker image
 docker build -t gs-spring-boot .
+# now clean up everything that we are done
 rm -fr dist
