@@ -29,9 +29,10 @@ cp ~/code/spring-boot-sample/build/libs/spring-boot-docker-0.1.0.jar dist/
 cat << EOF > dist/springboot.sh
 #!/bin/bash
 
-if [ -f /opt/environment ]; then
-	echo "found environment file"
-   source /opt/environment
+if [ -f /scripts/environment ]; then
+	echo "found environment file from scripts folder on host"
+	echo "injecting environment into container"
+   source /scripts/environment
 fi
 
 java -jar spring-boot-docker-0.1.0.jar

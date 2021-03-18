@@ -1,3 +1,4 @@
 export FOO=BAR
 export BAR=$FOO
 export BAZ=$FOO:$BAR
+echo "running script from the host volume"
