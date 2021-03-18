@@ -1,7 +1,9 @@
 export FOO=BAR
 export BAR=$FOO
 export BAZ=$FOO:$BAR
+timestamp=`date`
 echo "running script from the host volume"
 echo "this script was sourced from within a container"
 echo "this is how you can customize a container after it has been deployed"
 echo "you can add variables as shown above or even make other changes to the runtime"
+echo $timestamp
