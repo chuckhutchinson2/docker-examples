@@ -1,1 +1,5 @@
-docker run -d -p 0.0.0.0:8080:8080 gs-spring-boot
+# example of how to pass environment into the docker image by having a shell script in the 
+# container run a script that was passed in via a volume from the host running the container.
+# the image starts as a shell script and that script will "source" a script in the scripts folder
+PWD=`pwd`
+docker run -d -p 0.0.0.0:8080:8080 -v $PWD/scripts:/scripts:ro gs-spring-boot
